@@ -8,6 +8,8 @@ from nltk.tokenize import word_tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
+from plotly.graph_objs import Scatter
+from plotly.graph_objs import Histogram
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 
@@ -43,6 +45,16 @@ def index():
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
     
+    df_genre_scatter = df.groupby("genre").sum().drop(["id"],axis = 1)
+    genre_names = list(df_genre_scatter.index)
+    first_gen = df_genre_scatter[:1]
+    second_gen = df_genre_scatter[1:2]
+    third_gen = df_genre_scatter[2:3]
+    
+
+    df_cate_hist = df.drop(["message","id","original","genre"],axis = 1)
+    df_cate_hist["count_cate"] = df_cate_hist.sum(axis = 1)
+    
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
@@ -61,6 +73,62 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+        {
+            'data': [
+                Scatter(
+                    x=list(first_gen.columns),
+                    y=first_gen.values[0],
+                    marker={'color': 'blue', 'symbol': 'star', 'size': 10},
+                    mode='markers',
+                    name=first_gen.index[0]
+                ),
+                Scatter(
+                    x=list(second_gen.columns),
+                    y=second_gen.values[0],
+                    marker={'color': 'red', 'symbol': 'circle', 'size': 5},
+                    mode='markers',
+                    name=second_gen.index[0]
+                ),
+                Scatter(
+                    x=list(third_gen.columns),
+                    y=third_gen.values[0],
+                    marker={'color': 'green', 'symbol': 'x', 'size': 5},
+                    mode='markers',
+                    name=third_gen.index[0]
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Message Categories By Genre',
+                'yaxis': {
+                    'title': "Genre"
+                },
+                'xaxis': {
+                    'title': "Categories"
+                },
+                'font': {
+                    'size': 8
+                }
+            }
+        },
+#        Histogram(x=x)
+        {
+            'data': [
+                Histogram(
+                    x=df_cate_hist["count_cate"]
+                )
+            ],
+
+            'layout': {
+                'title': 'Histogram In Matched Genres Number of Every Message',
+                'yaxis': {
+                    'title': "Message Count"
+                },
+                'xaxis': {
+                    'title': "Matched Genres Number"
                 }
             }
         }
