@@ -13,6 +13,8 @@
 
 3. Go to http://0.0.0.0:3001/
     -This means,IP address input in the web browser can be any one between 127.0.0.1-127.255.255.255.
-    For instance, input http://127.0.0.1:3001 will show the result of run.py
+    For instance, input http://127.0.0.1:3001 will show the result of run.py  
+    Test sentence for example: "I need food."
+  
     
     

@@ -30,6 +30,8 @@ def tokenize(text):
 # load data
 engine = create_engine('sqlite:///../data/DisasterResponse.db')
 df = pd.read_sql_table('1st', engine)
+#drop the column only has 1 class, it is not informative for machine learning
+df = df.drop("child_alone",axis = 1)
 
 # load model
 model = joblib.load("../models/classifier.pkl")
@@ -102,7 +104,7 @@ def index():
             ],
 
             'layout': {
-                'title': 'Distribution of Message Categories By Genre',
+                'title': 'Distribution Of Message Categories By Genre',
                 'yaxis': {
                     'title': "Genre"
                 },
@@ -110,7 +112,7 @@ def index():
                     'title': "Categories"
                 },
                 'font': {
-                    'size': 8
+                    'size': 9
                 }
             }
         },
@@ -123,12 +125,12 @@ def index():
             ],
 
             'layout': {
-                'title': 'Histogram In Matched Genres Number of Every Message',
+                'title': 'Histogram In Matched Categories Number Of Every Message',
                 'yaxis': {
                     'title': "Message Count"
                 },
                 'xaxis': {
-                    'title': "Matched Genres Number"
+                    'title': "Matched Categories Number"
                 }
             }
         }

@@ -5,21 +5,27 @@ from sqlalchemy import create_engine
 import re
 import numpy as np
 import pandas as pd
-import pickle
-
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 
 from sklearn.multioutput import MultiOutputClassifier
-from sklearn.neighbors import KNeighborsClassifier
+#from sklearn.naive_bayes import MultinomialNB
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
+#from sklearn.pipeline import Pipeline, FeatureUnion
 
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import GridSearchCV
+
+import pickle
+import warnings
+import time
+
+import matplotlib.pyplot as plt
 
 
 def load_data(database_filepath):
@@ -27,6 +33,8 @@ def load_data(database_filepath):
     df = pd.read_sql_table('1st',engine)
     X = df.message.values
     df_Y = df.drop(["message","id","original","genre"],axis = 1)
+    #The category "child_alone" only has 1 class. I decide to remove this column because it is not informative for machine learning.
+    df_Y = df_Y.drop("child_alone",axis = 1)
     Y = df_Y.values
     category_names = df_Y.columns
     return X, Y, category_names
@@ -45,12 +53,18 @@ def tokenize(text):
 
 
 def build_model():
-    model = Pipeline([
+    pipeline = Pipeline([
     ('vect', CountVectorizer(tokenizer=tokenize)),
     ('tfidf', TfidfTransformer()),
-    ('clf', MultiOutputClassifier(KNeighborsClassifier()))
+    ('clf', MultiOutputClassifier(RandomForestClassifier()))
     ])
-    return model
+    parameters = {
+        'vect__ngram_range': ((1, 1), (1, 2)),
+        'clf__estimator__class_weight':("balanced",None) 
+     }
+
+    cv = GridSearchCV(pipeline, param_grid=parameters)
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
@@ -71,7 +85,8 @@ def main():
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
-        
+        warnings.simplefilter('ignore', FutureWarning)
+        start_time = time.time()
         print('Building model...')
         model = build_model()
         
@@ -83,6 +98,9 @@ def main():
 
         print('Saving model...\n    MODEL: {}'.format(model_filepath))
         save_model(model, model_filepath)
+        
+        elapsed_time = time.time()-start_time
+        print("elapsed_time:{}".format(elapsed_time))
 
         print('Trained model saved!')
 
