@@ -46,4 +46,22 @@ It is including:
 + Data visualizations using Plotly in the web app.
 All files are inside the folder pyFiles.Please check README file inside.  
 
-Folder link:[pyFiles](https://github.com/Data-Semi/Disaster-Response-Pipelines/tree/master/pyFiles)
+Folder link:[pyFiles](https://github.com/Data-Semi/Disaster-Response-Pipelines/tree/master/pyFiles)  
+
+## A brief insights on the project.  
++ Uninformative category data:     
+ I found there is a label named "chiled-alone"in the original data only include 1 class.(value is all 0).   
+ I droped the "chiled-alone" category from the original dataset in the first time.   
++ Imbalanced dataset:    
+ This dataset is imbalanced as we can see in image #2 screenshort above.(ie some labels like water have few examples).   
+ It will affects my training model's accuracy uninformative. For example, if my model predict all 0 in these labels which has few examples, the models accuracy willbe very high but it is not predicting well.     
+  I tuned "class_weight" parameter in GridSearchCV in my RandomForest model.   
++ Emphasizing precision or recall for the various categories  
+  I build 3 type of piplelines with GridSearchCV  
+  Compare these 3 piplelines with weighted average of f1-score.  
+    *Pipeline1 with MultinomialNB classifier which use naive bayes algorithm.  
+    *Pipeline2 with RandomForestClassifier classifier wich use random frest algorithm.  
+    *Pipeline3 with RandomForestClassifier classifier and an extra feature ContainsNumbers wich indicates whether a message includes a cardinal number or not.  
+    Acording to line-chart comparison,I choose to export pipeline2 , because it has better result in most categories than others.  
+
+
